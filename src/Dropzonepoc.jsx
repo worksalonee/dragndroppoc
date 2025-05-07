@@ -27,7 +27,9 @@ const Dropzonepoc = ({
   }));
 
   const [selectedItem, setSelectedItem] = useState(null);
-console.log("selectedItem==>",selectedItem)
+  
+// console.log("selectedItem==>",selectedItem)
+// console.log("droppedItems==>",droppedItems)
   useEffect(() => {
     const handleKeyDown = (event) => {
       if (event.key === "Delete" && droppedItems.length > 0) {
