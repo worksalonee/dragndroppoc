@@ -12,7 +12,7 @@ const PropertiesPanel = ({setDroppedItems, droppedItems,itemId, onClose }) => {
     
         if (droppedItem.id === item.id) {
           const updatedItem = { ...droppedItem, [key]: value };
-        //   console.log("✅ Updating item:", updatedItem);
+          console.log("✅ Updating item:", updatedItem);
           return updatedItem;
         } else {
           return droppedItem;

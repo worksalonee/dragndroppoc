@@ -2,20 +2,23 @@ import React, { useEffect, useState } from "react";
 import { useDrop } from "react-dnd";
 import closeIcon from "./assets/close-icon.svg";
 import PropertiesPanel from "./PropertiesPanel";
+import { useSelector, useDispatch } from "react-redux";
+import { setCurrentSectionId } from "./redux/sectionsSlice";
 
-const options = ["male", "female", "others"];
+const options = ["select","male", "female", "others"];
 const radioOptions = ["male", "female", "others"];
 const CheckBox = ["Allowed to vote", "Allowed not to vote"];
 
 const Dropzonepoc = ({
+  activeSection,
   isPublished,
   setIsPublished,
   setDroppedItems,
   droppedItems,
   onDrop,
-  onCopy,
   onDelete,
   onChange,
+  onCopy,
   handleSubmit,
 }) => {
   const [{ isOver }, drop] = useDrop(() => ({
@@ -25,9 +28,13 @@ const Dropzonepoc = ({
       isOver: !!monitor.isOver(),
     }),
   }));
-
+// console.log(setCurrentSectionId, "<===setCurrentSectionId in dropzonepoc");
   const [selectedItem, setSelectedItem] = useState(null);
-console.log("selectedItem==>",selectedItem)
+  const currentSectionId = useSelector((state) => state.sections.currentSectionId);
+  console.log(currentSectionId, "currentSectionId in dropzonepoc");
+  // {state.sections}
+  const currentSections= useSelector((state) => state.sections);
+  console.log(currentSections, "<======currentSections in dropzonepoc");
   useEffect(() => {
     const handleKeyDown = (event) => {
       if (event.key === "Delete" && droppedItems.length > 0) {
@@ -60,8 +67,8 @@ console.log("selectedItem==>",selectedItem)
             <div className="border-b border-dashed text-sm w-full mb-2">
               <h3 className="font-bold">Form Title</h3>
             </div>
-            <div className="border-b border-dotted text-base w-full mb-2">
-              <h5 className="font-semibold">Section</h5>
+            <div className="text-teal-700 text-lg font-medium mb-4">
+              {activeSection.name || currentSectionId} 
             </div>
           </>
         )}
@@ -109,14 +116,29 @@ console.log("selectedItem==>",selectedItem)
               <div
                 key={item.id}
                 className="flex items-center my-2 w-full max-w-xl"
-                onClick={() => setSelectedItem(item)}
+                onClick={(e) => {
+                  const tag = e.target.tagName.toLowerCase();
+                  if (
+                    tag === "input" ||
+                    tag === "select" ||
+                    tag === "textarea" ||
+                    tag === "button" ||
+                    tag === "label"
+                  ) {
+                    e.stopPropagation();
+                    return;
+                  }
+                  setSelectedItem(item);
+                }}
               >
                 <label className="mr-2 font-bold w-1/4">{fieldName}:</label>
                 <div className="flex-1">
                   {fieldType === "dropdown" ? (
+                    
                     <select className="border border-gray-300 px-2 py-1 w-full rounded">
                       {options.map((opt, idx) => (
-                        <option key={idx} value={opt}>
+                        <option key={idx} value={opt}
+                        disabled={!isPublished}>
                           {opt}
                         </option>
                       ))}
@@ -197,16 +219,23 @@ console.log("selectedItem==>",selectedItem)
                     />
                   )}
                 </div>
+
                 {!isPublished && (
                   <div className="flex gap-2 ml-2">
                     <button
-                      onClick={() => onCopy(index)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onCopy(index);
+                      }}
                       className="bg-yellow-300 text-green-700 px-2 py-1 rounded text-sm"
                     >
                       COPY
                     </button>
                     <button
-                      onClick={() => onDelete(item.id)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onDelete(item.id);
+                      }}
                       className="bg-pink-300 text-red-700 px-2 py-1 rounded text-sm"
                     >
                       DELETE
@@ -219,8 +248,11 @@ console.log("selectedItem==>",selectedItem)
 
           {isPublished && droppedItems.length > 0 && (
             <button
-            onClick={() => {handleSubmit();setIsPublished(!isPublished)}}
-              className="mt-4 bg-cyan-400 text-green-800 px-4 py-2 rounded hover:bg-cyan-500"
+              onClick={() => {
+                handleSubmit();
+                setIsPublished(!isPublished);
+              }}
+              className=" mt-4 bg-cyan-400 text-green-800 px-4 py-2 rounded hover:bg-cyan-500"
             >
               Submit
             </button>
@@ -230,20 +262,13 @@ console.log("selectedItem==>",selectedItem)
 
       {!isPublished && (
         <PropertiesPanel
-        setDroppedItems={setDroppedItems}
-        setSelectedItem={setSelectedItem}
-        droppedItems={droppedItems}
-        itemId={selectedItem?.id}
-          // item={selectedItem}
-          // onClick={() => setSelectedItem(item)}
+          setDroppedItems={setDroppedItems}
+          setSelectedItem={setSelectedItem}
+          droppedItems={droppedItems}
+          itemId={selectedItem?.id}
           onClose={() => setSelectedItem(null)}
-          // onChangeField={(id, key, value) => {
-          //   const updated = droppedItems.map((el) =>
-          //     el.id === id ? { ...el, [key]: value } : el
-          //   );
-          //   onChange(updated);
-          // }}
         />
+        
       )}
     </div>
   );
