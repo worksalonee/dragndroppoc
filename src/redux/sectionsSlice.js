@@ -11,7 +11,14 @@ const initialState = {
     { id: 5, name: 'Address', fieldName: 'Address', value: '', placeholder: 'Enter Address' },
     { id: 6, name: 'Date', fieldName: 'Date', value: '', placeholder: 'Enter the date' },
     { id: 7, name: 'Time', fieldName: 'Time', value: '', placeholder: 'Enter Time' },
-    { id: 8, name: 'Dropdown', fieldName: 'DropDown', value: '', placeholder: 'Enter dropdown' },
+    {
+  id: 8,
+  name: 'Dropdown',
+  fieldName: 'DropDown',
+  value: '',
+  placeholder: 'Enter dropdown',
+  options: ['Fruit Trees', 'Timber Trees', 'Medicinal Trees', 'Other'], // NEW
+},
     { id: 9, fieldName: 'Single-line', name: 'Checkbox', value: '', placeholder: 'Enter checkbox need to be add' },
     { id: 10, fieldName: 'Radio', name: 'Radio', value: '', placeholder: 'radio buttons to be add' },
     { id: 11, fieldName: 'Upload File', name: 'Upload File', value: '', placeholder: 'Please Upload File' },
@@ -49,6 +56,13 @@ const sectionsSlice = createSlice({
         item.value = value;
       }
     },
+    updateDropdownOptions: (state, action) => {
+  const { id, options } = action.payload;
+  const dropdownItem = state.items.find(item => item.id === id && item.name === 'Dropdown');
+  if (dropdownItem) {
+    dropdownItem.options = options;
+  }
+}
   },
 });
 
@@ -57,6 +71,7 @@ export const {
   deleteSection,
   setCurrentSectionId,
   updateItemValue,
+   updateDropdownOptions,
 } = sectionsSlice.actions;
 
 export default sectionsSlice.reducer;
