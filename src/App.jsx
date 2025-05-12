@@ -20,6 +20,7 @@ function App() {
   
   const activeSection = sections.find((sec) => sec.id === currentSectionId);
 
+
   const handleDrop = (item) => {
     const newItem = {
       ...item,

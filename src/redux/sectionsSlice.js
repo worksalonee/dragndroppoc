@@ -12,15 +12,23 @@ const initialState = {
     { id: 5, name: 'Address', fieldName: 'Address', value: '', placeholder: 'Enter Address' },
     { id: 6, name: 'Date', fieldName: 'Date', value: '', placeholder: 'Enter the date' },
     { id: 7, name: 'Time', fieldName: 'Time', value: '', placeholder: 'Enter Time' },
-    { id: 8, name: 'Dropdown', fieldName: 'DropDown', value: '', placeholder: 'Enter dropdown' },
-    { id: 9, fieldName: 'Single-line', name: 'Checkbox', value: '', placeholder: 'Enter checkbox need to be add' },
-    { id: 10, fieldName: 'Radio', name: 'Radio', value: '', placeholder: 'radio buttons to be add' },
+    {
+  id: 8,
+  name: 'DropDown',
+  fieldName: "DropDown",
+  placeHolder: "",
+  options: ["Fruit Trees", "Timber Trees", "Medicinal Trees", "Other"]
+},
+    // { id: 9, fieldName: 'Check-Box', name: 'Checkbox', 
+    //   pH:"", options: ['Apple','Banana','Cherry','Dates'] },
+    { id: 10, fieldName: 'Radio', name: 'Radio', value: '', options: [" Trees", "Animal", "Medicinal Trees", "Other"] },
     { id: 11, fieldName: 'Upload File', name: 'Upload File', value: '', placeholder: 'Please Upload File' },
     { id: 12, name: 'Image', fieldName: 'Image', value: '', placeholder: 'Please Upload Image' },
     { id: 13, name: 'Video', fieldName: 'Video', value: '', placeholder: 'Please Upload Video' },
-    { id: 14, name: 'url', fieldName: 'Single-line', value: '', placeholder: 'Enter url' },
+    { id: 14, name: 'url', fieldName: 'URL', value: '', placeholder: 'Enter url' },
   ],
 };
+
 
 const sectionsSlice = createSlice({
   name: "sections",

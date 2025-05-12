@@ -2,10 +2,9 @@ import React, { useEffect, useState } from "react";
 import { useDrop } from "react-dnd";
 import closeIcon from "./assets/close-icon.svg";
 import PropertiesPanel from "./PropertiesPanel";
-
-const options = ["male", "female", "others"];
-const radioOptions = ["male", "female", "others"];
-const CheckBox = ["Allowed to vote", "Allowed not to vote"];
+import { useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
+import { addSection, setCurrentSectionId } from "./redux/sectionsSlice";
 
 const Dropzonepoc = ({
   isPublished,
@@ -27,9 +26,7 @@ const Dropzonepoc = ({
   }));
 
   const [selectedItem, setSelectedItem] = useState(null);
-  
-// console.log("selectedItem==>",selectedItem)
-// console.log("droppedItems==>",droppedItems)
+
   useEffect(() => {
     const handleKeyDown = (event) => {
       if (event.key === "Delete" && droppedItems.length > 0) {
@@ -42,7 +39,7 @@ const Dropzonepoc = ({
   }, [droppedItems, onDelete]);
 
   return (
-    <div className="w-full h-full flex flex-col items-center justify-center">
+    <div className="w-full h-full flex flex-col items-center justify-center ">
       <div
         ref={drop}
         className={`w-full h-full flex flex-col items-center p-5 ${
@@ -95,8 +92,6 @@ const Dropzonepoc = ({
                 ? "file"
                 : fieldName.toLowerCase() === "video"
                 ? "file"
-                : fieldName.toLowerCase() === "checkbox"
-                ? "checkbox"
                 : fieldName.toLowerCase() === "radio"
                 ? "radio"
                 : fieldName.toLowerCase() === "multiline"
@@ -115,17 +110,17 @@ const Dropzonepoc = ({
               >
                 <label className="mr-2 font-bold w-1/4">{fieldName}:</label>
                 <div className="flex-1">
-                  {fieldType === "dropdown" ? (
-                    <select className="border border-gray-300 px-2 py-1 w-full rounded">
-                      {options.map((opt, idx) => (
+                  {fieldType === "dropdown" || fieldName === "DropDown" ? (
+                    <select className="border border-gray-300 px-2 py-1 min-w-max w-full rounded">
+                      {item.options.map((opt, idx) => (
                         <option key={idx} value={opt}>
                           {opt}
                         </option>
                       ))}
                     </select>
-                  ) : fieldType === "radio" ? (
+                  ) : fieldType === "radio" || item.fieldName === "Radio" ? (
                     <div className="flex gap-4">
-                      {radioOptions.map((option, idx) => (
+                      {item.options.map((option, idx) => (
                         <label key={idx} className="flex items-center gap-1">
                           <input
                             type="radio"
@@ -136,35 +131,6 @@ const Dropzonepoc = ({
                             onChange={(e) =>
                               onChange(item.id, e.target.value)
                             }
-                          />
-                          {option}
-                        </label>
-                      ))}
-                    </div>
-                  ) : fieldType === "checkbox" ? (
-                    <div className="flex flex-col gap-1">
-                      {CheckBox.map((option, idx) => (
-                        <label key={idx} className="flex items-center gap-1">
-                          <input
-                            type="checkbox"
-                            value={option}
-                            checked={
-                              Array.isArray(item.value) &&
-                              item.value.includes(option)
-                            }
-                            disabled={!isPublished}
-                            onChange={(e) => {
-                              const isChecked = e.target.checked;
-                              let newValue = Array.isArray(item.value)
-                                ? [...item.value]
-                                : [];
-                              if (isChecked) {
-                                newValue.push(option);
-                              } else {
-                                newValue = newValue.filter((v) => v !== option);
-                              }
-                              onChange(item.id, newValue);
-                            }}
                           />
                           {option}
                         </label>
@@ -202,13 +168,19 @@ const Dropzonepoc = ({
                 {!isPublished && (
                   <div className="flex gap-2 ml-2">
                     <button
-                      onClick={() => onCopy(index)}
+                      onClick={(e) => {
+                        e.stopPropagation(); // prevents PropertiesPanel from opening
+                        onCopy(index);
+                      }}
                       className="bg-yellow-300 text-green-700 px-2 py-1 rounded text-sm"
                     >
                       COPY
                     </button>
                     <button
-                      onClick={() => onDelete(item.id)}
+                      onClick={(e) => {
+                        e.stopPropagation(); // prevents PropertiesPanel from opening
+                        onDelete(item.id);
+                      }}
                       className="bg-pink-300 text-red-700 px-2 py-1 rounded text-sm"
                     >
                       DELETE
@@ -221,7 +193,10 @@ const Dropzonepoc = ({
 
           {isPublished && droppedItems.length > 0 && (
             <button
-            onClick={() => {handleSubmit();setIsPublished(!isPublished)}}
+              onClick={() => {
+                handleSubmit();
+                setIsPublished(!isPublished);
+              }}
               className="mt-4 bg-cyan-400 text-green-800 px-4 py-2 rounded hover:bg-cyan-500"
             >
               Submit
@@ -232,19 +207,11 @@ const Dropzonepoc = ({
 
       {!isPublished && (
         <PropertiesPanel
-        setDroppedItems={setDroppedItems}
-        setSelectedItem={setSelectedItem}
-        droppedItems={droppedItems}
-        itemId={selectedItem?.id}
-          // item={selectedItem}
-          // onClick={() => setSelectedItem(item)}
+          setDroppedItems={setDroppedItems}
+          setSelectedItem={setSelectedItem}
+          droppedItems={droppedItems}
+          itemId={selectedItem?.id}
           onClose={() => setSelectedItem(null)}
-          // onChangeField={(id, key, value) => {
-          //   const updated = droppedItems.map((el) =>
-          //     el.id === id ? { ...el, [key]: value } : el
-          //   );
-          //   onChange(updated);
-          // }}
         />
       )}
     </div>
