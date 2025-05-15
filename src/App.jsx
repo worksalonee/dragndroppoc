@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState,useRef,useEffect } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { v4 as uuidv4 } from "uuid";
@@ -6,7 +6,8 @@ import Header from "./Header";
 import Aside from "./Aside";
 import Dropzonepoc from "./Dropzonepoc";
 import { useSelector, useDispatch } from 'react-redux';
-import { addSection,setCurrentSectionId } from "./redux/sectionsSlice";
+
+import { addSection,setCurrentSectionId  } from "./redux/sectionsSlice";
 
 function App() {
   const [isPublished, setIsPublished] = useState(false);
@@ -14,12 +15,21 @@ function App() {
   const dispatch = useDispatch();
   const [activeSectionId, setActiveSectionId] = useState(sections[0]?.id || null);
   // const activeSection = sections.find(sec => sec.id === activeSectionId);
-  const currentSectionId = useSelector((state) => state.sections.currentSectionId);
+const currentSectionId = useSelector((state) => state.sections.currentSectionId);
   const items = useSelector((state) => state.sections.items);
   const [droppedItems, setDroppedItems] = useState([]);
   
   const activeSection = sections.find((sec) => sec.id === currentSectionId);
 
+
+
+
+  const currentSectionIdRef = useRef(currentSectionId);
+
+// keep it updated on Redux change
+useEffect(() => {
+  currentSectionIdRef.current = currentSectionId;
+}, [currentSectionId]);
 
   const handleDrop = (item) => {
     const newItem = {
@@ -27,7 +37,7 @@ function App() {
       id: uuidv4(),
       value: "",
       placeholder: item.placeholder,
-      sectionId: currentSectionId, // Track section for each field
+    sectionId: currentSectionIdRef.current, // Track section for each field
     };
     setDroppedItems((prevItems) => [...prevItems, newItem]);
   };
@@ -135,7 +145,7 @@ function App() {
                     handleSubmit={handleSubmit}
                     onDrop={handleDrop}
                     setDroppedItems={setDroppedItems}
-                    droppedItems={droppedItems.filter(item => item.sectionId === activeSectionId)}
+                    droppedItems={droppedItems.filter(item => item.sectionId === currentSectionId)}
                     onCopy={handleCopy}
                     onDelete={handleDelete}
                     onChange={handleChange}
