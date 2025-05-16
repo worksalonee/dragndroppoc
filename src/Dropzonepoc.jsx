@@ -56,10 +56,10 @@ const Dropzonepoc = ({
                 onClick={() => setIsPublished(!isPublished)}
               />
             </div>
-            <div className="border-b border-dashed text-sm w-full mb-2">
+            <div className=" text-sm flex justify-center w-full mb-2">
               <h3 className="font-bold">Form Title</h3>
             </div>
-            <div className="border-b border-dotted text-base w-full mb-2">
+            <div className=" text-base flex justify-center w-full mb-2">
               <h5 className="font-semibold">Section</h5>
             </div>
           </>
@@ -128,9 +128,7 @@ const Dropzonepoc = ({
                             value={option}
                             checked={item.value === option}
                             disabled={!isPublished}
-                            onChange={(e) =>
-                              onChange(item.id, e.target.value)
-                            }
+                            onChange={(e) => onChange(item.id, e.target.value)}
                           />
                           {option}
                         </label>
@@ -192,15 +190,20 @@ const Dropzonepoc = ({
           })}
 
           {isPublished && droppedItems.length > 0 && (
-            <button
-              onClick={() => {
-                handleSubmit();
-                setIsPublished(!isPublished);
-              }}
-              className="mt-4 bg-cyan-400 text-green-800 px-4 py-2 rounded hover:bg-cyan-500"
-            >
-              Submit
-            </button>
+            <div className="flex w-full justify-around mt-4">
+              <button className="bg-cyan-800 text-white px-4 py-2 rounded hover:bg-green-400">
+                Next
+              </button>
+              <button
+                onClick={() => {
+                  handleSubmit();
+                  setIsPublished(!isPublished);
+                }}
+                className="bg-cyan-400 text-green-800 px-4 py-2 rounded hover:bg-cyan-500"
+              >
+                Submit
+              </button>
+            </div>
           )}
         </div>
       </div>

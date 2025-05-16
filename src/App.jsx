@@ -22,7 +22,7 @@ const currentSectionId = useSelector((state) => state.sections.currentSectionId)
   const activeSection = sections.find((sec) => sec.id === currentSectionId);
 
 
-
+console.log(droppedItems, "droppedItems in App");
 
   const currentSectionIdRef = useRef(currentSectionId);
 
@@ -63,10 +63,14 @@ useEffect(() => {
     console.log(JSON.stringify(droppedItems), "<==== formData");
   };
 
-  const handleAddSection = () => {
-    dispatch(addSection());
+const handleAddSection = () => {
+  const newSection = {
+    id: uuidv4(), // generate unique ID
+    name: `Section ${sections.length + 1}`,
   };
-
+  dispatch(addSection(newSection));             // Add it
+  dispatch(setCurrentSectionId(newSection.id)); // Activate it
+};
   return (
     <>
       {!isPublished ? (
@@ -165,7 +169,7 @@ useEffect(() => {
                 setDroppedItems={setDroppedItems}
                 handleSubmit={handleSubmit}
                 onDrop={handleDrop}
-                droppedItems={droppedItems}
+                droppedItems={droppedItems.filter(item => item.sectionId === currentSectionId)}
                 onCopy={handleCopy}
                 onDelete={handleDelete}
                 onChange={handleChange}
