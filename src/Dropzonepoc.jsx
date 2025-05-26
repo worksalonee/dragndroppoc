@@ -2,10 +2,10 @@ import React, { useEffect, useState } from "react";
 import { useDrop } from "react-dnd";
 import closeIcon from "./assets/close-icon.svg";
 import PropertiesPanel from "./PropertiesPanel";
+import { useSelector, useDispatch } from "react-redux";
+import { setCurrentSectionId } from "./redux/sectionsSlice";
+import Dropdown from "./Dropdown";
 
-const options = ["male", "female", "others"];
-const radioOptions = ["male", "female", "others"];
-const CheckBox = ["Allowed to vote", "Allowed not to vote"];
 
 const Dropzonepoc = ({
   isPublished,
@@ -18,6 +18,18 @@ const Dropzonepoc = ({
   onChange,
   handleSubmit,
 }) => {
+  const dispatch = useDispatch();
+  const [selectedItem, setSelectedItem] = useState(null);
+
+  const currentSectionId = useSelector((state) => state.sections.currentSectionId);
+  const sections = useSelector((state) => state.sections.sections) || [];
+
+  const sectionIds = sections.map((section) => section.id);
+  const currentIndex = sectionIds.indexOf(currentSectionId);
+
+  const isFirstPage = currentIndex === 0;
+  const isLastPage = currentIndex === sectionIds.length - 1;
+
   const [{ isOver }, drop] = useDrop(() => ({
     accept: "FORM_ELEMENT",
     drop: (item) => onDrop(item),
@@ -26,19 +38,30 @@ const Dropzonepoc = ({
     }),
   }));
 
-  const [selectedItem, setSelectedItem] = useState(null);
-console.log("selectedItem==>",selectedItem)
+  console.log("droppedItems------------->",droppedItems)
+
   useEffect(() => {
     const handleKeyDown = (event) => {
       if (event.key === "Delete" && droppedItems.length > 0) {
         onDelete(droppedItems[droppedItems.length - 1].id);
       }
     };
-
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [droppedItems, onDelete]);
 
+  const goToNext = () => {
+    if (!isLastPage) {
+      dispatch(setCurrentSectionId(sectionIds[currentIndex + 1]));
+    }
+  };
+
+  const goToPrevious = () => {
+    if (!isFirstPage) {
+      dispatch(setCurrentSectionId(sectionIds[currentIndex - 1]));
+    }
+  };
+console.log(selectedItem,"SelectedItem===")
   return (
     <div className="w-full h-full flex flex-col items-center justify-center">
       <div
@@ -54,14 +77,16 @@ console.log("selectedItem==>",selectedItem)
                 src={closeIcon}
                 alt="Close"
                 className="w-4 flex cursor-pointer"
-                onClick={() => setIsPublished(!isPublished)}
+                onClick={() => setIsPublished(false)}
               />
             </div>
-            <div className="border-b border-dashed text-sm w-full mb-2">
+            <div className="text-sm flex justify-center w-full mb-2">
               <h3 className="font-bold">Form Title</h3>
             </div>
-            <div className="border-b border-dotted text-base w-full mb-2">
-              <h5 className="font-semibold">Section</h5>
+            <div className="text-base flex justify-center w-full mb-2">
+              <span className="text-cyan-600">
+                Section: {currentSectionId}
+              </span>
             </div>
           </>
         )}
@@ -72,58 +97,29 @@ console.log("selectedItem==>",selectedItem)
 
         <div className="w-full flex flex-col items-center">
           {droppedItems.map((item, index) => {
+            
             const fieldName = item.fieldName || `Field ${index + 1}`;
-            const fieldType =
-              fieldName.toLowerCase() === "phone" ||
-              fieldName.toLowerCase() === "number"
-                ? "number"
-                : fieldName.toLowerCase() === "date"
-                ? "date"
-                : fieldName.toLowerCase() === "time"
-                ? "time"
-                : fieldName.toLowerCase() === "email"
-                ? "email"
-                : fieldName.toLowerCase() === "url"
-                ? "url"
-                : fieldName.toLowerCase() === "address"
-                ? "text"
-                : fieldName.toLowerCase() === "upload file"
-                ? "file"
-                : fieldName.toLowerCase() === "image"
-                ? "file"
-                : fieldName.toLowerCase() === "video"
-                ? "file"
-                : fieldName.toLowerCase() === "checkbox"
-                ? "checkbox"
-                : fieldName.toLowerCase() === "radio"
-                ? "radio"
-                : fieldName.toLowerCase() === "multiline"
-                ? "textarea"
-                : fieldName.toLowerCase() === "singleline"
-                ? "text"
-                : fieldName.toLowerCase() === "dropdown"
-                ? "dropdown"
-                : "text";
+            let fieldType=item.type;
+
 
             return (
               <div
                 key={item.id}
                 className="flex items-center my-2 w-full max-w-xl"
                 onClick={() => setSelectedItem(item)}
+                
               >
+                {console.log(item,"Item==")}
                 <label className="mr-2 font-bold w-1/4">{fieldName}:</label>
                 <div className="flex-1">
                   {fieldType === "dropdown" ? (
-                    <select className="border border-gray-300 px-2 py-1 w-full rounded">
-                      {options.map((opt, idx) => (
-                        <option key={idx} value={opt}>
-                          {opt}
-                        </option>
-                      ))}
-                    </select>
+                    <Dropdown
+                      data={item}
+                      handleChange={onChange}
+                    />
                   ) : fieldType === "radio" ? (
                     <div className="flex gap-4">
-                      {radioOptions.map((option, idx) => (
+                      {item?.options?.options?.map((option, idx) => (
                         <label key={idx} className="flex items-center gap-1">
                           <input
                             type="radio"
@@ -131,38 +127,7 @@ console.log("selectedItem==>",selectedItem)
                             value={option}
                             checked={item.value === option}
                             disabled={!isPublished}
-                            onChange={(e) =>
-                              onChange(item.id, e.target.value)
-                            }
-                          />
-                          {option}
-                        </label>
-                      ))}
-                    </div>
-                  ) : fieldType === "checkbox" ? (
-                    <div className="flex flex-col gap-1">
-                      {CheckBox.map((option, idx) => (
-                        <label key={idx} className="flex items-center gap-1">
-                          <input
-                            type="checkbox"
-                            value={option}
-                            checked={
-                              Array.isArray(item.value) &&
-                              item.value.includes(option)
-                            }
-                            disabled={!isPublished}
-                            onChange={(e) => {
-                              const isChecked = e.target.checked;
-                              let newValue = Array.isArray(item.value)
-                                ? [...item.value]
-                                : [];
-                              if (isChecked) {
-                                newValue.push(option);
-                              } else {
-                                newValue = newValue.filter((v) => v !== option);
-                              }
-                              onChange(item.id, newValue);
-                            }}
+                            onChange={(e) => onChange(item.id, e.target.value)}
                           />
                           {option}
                         </label>
@@ -176,9 +141,7 @@ console.log("selectedItem==>",selectedItem)
                       value={item.value || ""}
                       onChange={(e) => onChange(item.id, e.target.value)}
                       className={`px-2 py-1 rounded w-full ${
-                        isPublished
-                          ? "border border-black"
-                          : "border border-gray-300"
+                        isPublished ? "border border-black" : "border border-gray-300"
                       }`}
                     />
                   ) : (
@@ -190,23 +153,28 @@ console.log("selectedItem==>",selectedItem)
                       value={item.value || ""}
                       onChange={(e) => onChange(item.id, e.target.value)}
                       className={`px-2 py-1 mr-2 rounded w-full ${
-                        isPublished
-                          ? "border border-black"
-                          : "border border-gray-300"
+                        isPublished ? "border border-black" : "border border-gray-300"
                       }`}
                     />
                   )}
                 </div>
+
                 {!isPublished && (
                   <div className="flex gap-2 ml-2">
                     <button
-                      onClick={() => onCopy(index)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onCopy(index);
+                      }}
                       className="bg-yellow-300 text-green-700 px-2 py-1 rounded text-sm"
                     >
                       COPY
                     </button>
                     <button
-                      onClick={() => onDelete(item.id)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onDelete(item.id);
+                      }}
                       className="bg-pink-300 text-red-700 px-2 py-1 rounded text-sm"
                     >
                       DELETE
@@ -217,32 +185,46 @@ console.log("selectedItem==>",selectedItem)
             );
           })}
 
-          {isPublished && droppedItems.length > 0 && (
-            <button
-            onClick={() => {handleSubmit();setIsPublished(!isPublished)}}
-              className="mt-4 bg-cyan-400 text-green-800 px-4 py-2 rounded hover:bg-cyan-500"
-            >
-              Submit
-            </button>
+          {isPublished &&  (
+            <div className="flex w-full justify-around mt-4">
+              {!isFirstPage && (
+                <button
+                  onClick={goToPrevious}
+                  className="bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-600"
+                >
+                  Back
+                </button>
+              )}
+              {!isLastPage ? (
+                <button
+                  onClick={goToNext}
+                  className="bg-yellow-300 text-white px-4 py-2 rounded hover:bg-green-400"
+                >
+                  Next
+                </button>
+              ) : (
+                <button
+                  onClick={() => {
+                    handleSubmit();
+                    setIsPublished(false);
+                  }}
+                  className="bg-cyan-400 text-green-800 px-4 py-2 rounded hover:bg-cyan-500"
+                >
+                  Submit
+                </button>
+              )}
+            </div>
           )}
         </div>
       </div>
 
       {!isPublished && (
         <PropertiesPanel
-        setDroppedItems={setDroppedItems}
-        setSelectedItem={setSelectedItem}
-        droppedItems={droppedItems}
-        itemId={selectedItem?.id}
-          // item={selectedItem}
-          // onClick={() => setSelectedItem(item)}
+          setDroppedItems={setDroppedItems}
+          setSelectedItem={setSelectedItem}
+          droppedItems={droppedItems}
+          itemId={selectedItem?.id}
           onClose={() => setSelectedItem(null)}
-          // onChangeField={(id, key, value) => {
-          //   const updated = droppedItems.map((el) =>
-          //     el.id === id ? { ...el, [key]: value } : el
-          //   );
-          //   onChange(updated);
-          // }}
         />
       )}
     </div>

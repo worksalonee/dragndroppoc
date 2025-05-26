@@ -1,10 +1,10 @@
 import { useDrag } from "react-dnd";
 
-const Dragitempoc = ({ name, fieldName, color = "text-gray-800",placeHolder }) => {
-  console.log(placeHolder, "placeHolder in dragitempoc");
+const Dragitempoc = ({ name, fieldName, color = "text-gray-800",placeHolder , options,type}) => {
+  // console.log(type, "type in dragitempoc");
   const [{ isDragging }, drag] = useDrag(() => ({
     type: "FORM_ELEMENT",
-    item: { fieldName,placeHolder },
+    item: { fieldName,placeHolder,options,type },
     collect: (monitor) => ({
       isDragging: !!monitor.isDragging(),
     }),
