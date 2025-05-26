@@ -59,6 +59,7 @@ const Aside = () => {
                     color={item.color}
                     placeHolder={item.placeHolder}
                     options={item.options}
+                    type={item?.type}
                   />
                 </div>
               ))}

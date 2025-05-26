@@ -7,7 +7,7 @@ import Aside from "./Aside";
 import Dropzonepoc from "./Dropzonepoc";
 import { useSelector, useDispatch } from 'react-redux';
 
-import { addSection,setCurrentSectionId  } from "./redux/sectionsSlice";
+import { addSection,setCurrentSectionId,addDroppedItemToSection  } from "./redux/sectionsSlice";
 
 function App() {
   const [isPublished, setIsPublished] = useState(false);
@@ -17,6 +17,7 @@ function App() {
   // const activeSection = sections.find(sec => sec.id === activeSectionId);
 const currentSectionId = useSelector((state) => state.sections.currentSectionId);
   const items = useSelector((state) => state.sections.items);
+  console.log("items in app.jsx==>",items)
   const [droppedItems, setDroppedItems] = useState([]);
   
   const activeSection = sections.find((sec) => sec.id === currentSectionId);
@@ -32,12 +33,14 @@ useEffect(() => {
 }, [currentSectionId]);
 
   const handleDrop = (item) => {
+    console.log("item in handleDrop==>",item)
     const newItem = {
       ...item,
       id: uuidv4(),
       value: "",
       placeholder: item.placeholder,
     sectionId: currentSectionIdRef.current, // Track section for each field
+    
     };
     setDroppedItems((prevItems) => [...prevItems, newItem]);
   };
@@ -52,22 +55,28 @@ useEffect(() => {
   };
 
   const handleChange = (id, newValue) => {
+    console.log(id,newValue,"id&newvalue----");
+    
     setDroppedItems((prevItems) =>
       prevItems.map((item) =>
         item.id === id ? { ...item, value: newValue } : item
       )
     );
   };
+  
 
   const handleSubmit = () => {
     console.log(JSON.stringify(droppedItems), "<==== formData");
   };
 
 const handleAddSection = () => {
+  const newSectionId = sections.length + 1; // Use incremental ID
+
   const newSection = {
-    id: uuidv4(), // generate unique ID
-    name: `Section ${sections.length + 1}`,
+    id: newSectionId.toString(), // Convert number to string to keep consistency
+    name: `Section ${newSectionId}`,
   };
+
   dispatch(addSection(newSection));             // Add it
   dispatch(setCurrentSectionId(newSection.id)); // Activate it
 };
